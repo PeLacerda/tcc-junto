@@ -3,7 +3,8 @@
 ## Instalar
 ```
 python -m venv venv
-source venv/bin/activate        # Windows: venv\Scripts\activate
+# Windows PowerShell: .\venv\Scripts\Activate.ps1
+# Linux/macOS: source venv/bin/activate
 pip install fastapi uvicorn sqlalchemy "passlib[bcrypt]" "bcrypt==4.0.1" python-jose[crypt] python-dotenv python-multipart alembic
 ```
 

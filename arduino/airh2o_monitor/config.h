@@ -4,8 +4,8 @@
 #include <Arduino.h>
 
 // ===== Wi-Fi =====
-#define WIFI_SSID "NOME_WIFI"
-#define WIFI_PASSWORD "SENHA_WIFI"
+#define WIFI_SSID "PEDRO"
+#define WIFI_PASSWORD "salvador"
 
 // ===== Identificacao deste dispositivo no banco =====
 #define DISPOSITIVO_ID "esp32-reservatorio-01"
@@ -13,7 +13,7 @@
 
 // ===== API =====
 
-#define API_BASE_URL "http://192.168.15.13:8000"
+#define API_BASE_URL "http://192.168.137.1:8000"
 #define API_MEDICOES_PATH "/api/medicoes"
 
 // ===== Tempos =====
