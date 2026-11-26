@@ -20,3 +20,4 @@ python -m uvicorn main:app --host 0.0.0.0 --port 8000
 ## Rotas de medição
 - `POST /api/medicoes` — recebe o JSON enviado pelo ESP32.
 - `GET  /api/medicoes/ultima` — último nível, usado pelo tanque de cisterna do front.
+- `GET  /api/medicoes/historico?limite=50` — últimas medições, usadas no log de eventos do front (limite de 1 a 200).

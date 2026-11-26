@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from typing import List
 from models import Medicao
@@ -47,3 +47,24 @@ async def ultima_medicao(session=Depends(pegar_sessao)):
         "capacidade_litros": m.capacidade_litros,
         "criado_em": m.criado_em.isoformat() + "Z",
     }
+
+
+@medicao_router.get("/historico")
+async def historico_medicoes(
+    limite: int = Query(default=50, ge=1, le=200),
+    session=Depends(pegar_sessao),
+):
+    medicoes = session.query(Medicao).order_by(Medicao.id.desc()).limit(limite).all()
+    return [
+        {
+            "id": m.id,
+            "dispositivo_id": m.dispositivo_id,
+            "dispositivo_nome": m.dispositivo_nome,
+            "nivel_percentual": m.nivel_percentual,
+            "nivel_litros": m.nivel_litros,
+            "capacidade_litros": m.capacidade_litros,
+            "sensores_ativos": [m.sensor25, m.sensor50, m.sensor75, m.sensor100],
+            "criado_em": m.criado_em.isoformat() + "Z",
+        }
+        for m in medicoes
+    ]
