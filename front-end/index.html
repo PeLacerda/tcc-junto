@@ -168,6 +168,9 @@
             border-radius: 15px;
             width: 90%;
             max-width: 450px;
+            max-height: calc(100vh - 24px);
+            max-height: calc(100dvh - 24px);
+            overflow-y: auto;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
             animation: slideUp 0.3s ease;
         }
@@ -620,35 +623,6 @@
             z-index: 10;
         }
 
-        /* SENSORES */
-        .sensors-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-        }
-
-        .sensor-box {
-            background: var(--bg-dark);
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid var(--primary);
-        }
-
-        .sensor-secondary { border-left-color: var(--secondary); }
-        .sensor-accent { border-left-color: var(--accent); }
-
-        .sensor-label {
-            color: var(--text-secondary);
-            font-size: 12px;
-            margin-bottom: 5px;
-        }
-
-        .sensor-value {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
         /* LOG DE EVENTOS */
         .event-log {
             max-height: 400px;
@@ -661,6 +635,11 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 12px;
+        }
+
+        .log-entry > div {
+            min-width: 0;
         }
 
         .log-title {
@@ -756,7 +735,7 @@
         /* DISPOSITIVOS */
         .devices-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
             gap: 20px;
         }
 
@@ -869,32 +848,167 @@
 
         /* RESPONSIVO */
         @media (max-width: 768px) {
+            header {
+                padding: 10px 0;
+            }
+
             .header-content {
-                flex-direction: column;
-                gap: 15px;
+                flex-direction: row;
+                gap: 8px;
+                padding: 0 14px;
+            }
+
+            .logo {
+                font-size: 22px;
+                gap: 7px;
             }
 
             .auth-buttons {
-                width: 100%;
-                justify-content: center;
+                width: auto;
+                justify-content: flex-end;
+                gap: 6px;
+            }
+
+            .auth-buttons .btn {
+                padding: 8px 10px;
+                font-size: 12px;
+            }
+
+            main {
+                margin-top: 64px;
+            }
+
+            .container {
+                padding: 14px;
+            }
+
+            #dashboardContent {
+                padding-top: 132px;
             }
 
             .dashboard-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+                gap: 14px;
             }
 
             .modal-content {
                 width: 95%;
-                margin: 20% auto;
+                margin: 12px auto;
+                padding: 22px;
             }
 
             .tabs-nav {
-                justify-content: center;
+                top: 60px;
+                justify-content: flex-start;
+                flex-wrap: nowrap;
+                gap: 6px;
+                padding: 8px 12px;
+                overflow-x: auto;
+                overflow-y: hidden;
+                scrollbar-width: thin;
+                -webkit-overflow-scrolling: touch;
             }
 
             .tab-btn {
+                flex: 0 0 auto;
                 font-size: 12px;
-                padding: 10px 16px;
+                padding: 10px 14px;
+            }
+
+            .hero-section {
+                margin: 24px 0;
+                padding: 40px 18px;
+            }
+
+            .hero-title {
+                font-size: 38px;
+            }
+
+            .hero-subtitle {
+                font-size: 18px;
+            }
+
+            .card {
+                padding: 18px;
+            }
+
+            .log-entry {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .chart-placeholder {
+                min-height: 220px;
+                height: auto;
+                padding: 20px;
+                text-align: center;
+            }
+
+            .cta-section {
+                padding: 36px 18px;
+            }
+
+            .cta-title {
+                font-size: 28px;
+            }
+
+            .cta-buttons,
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .cta-buttons .btn {
+                width: 100%;
+            }
+
+            .device-actions {
+                flex-wrap: wrap;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .header-content {
+                padding: 0 10px;
+            }
+
+            .logo {
+                font-size: 20px;
+            }
+
+            .auth-buttons .btn {
+                padding: 7px 8px;
+                font-size: 11px;
+            }
+
+            .tabs-nav {
+                top: 56px;
+                padding: 8px 10px;
+            }
+
+            #dashboardContent {
+                padding-top: 136px;
+            }
+
+            .container {
+                padding: 10px;
+            }
+
+            .hero-title {
+                font-size: 34px;
+            }
+
+            .card-title {
+                font-size: 16px;
+            }
+
+            .metric-value {
+                font-size: 40px;
+            }
+
+            .modal-content {
+                width: calc(100% - 16px);
+                padding: 18px;
             }
         }
     </style>
@@ -1015,8 +1129,8 @@
 
                 <div class="card feature-card">
                     <div class="feature-icon icon-secondary"><i class="fas fa-chart-line"></i></div>
-                    <h3 class="feature-title title-secondary">Controle Inteligente</h3>
-                    <p class="feature-text">Controle remotamente bombas, válvulas e automações pela web ou mobile app.</p>
+                    <h3 class="feature-title title-secondary">Monitoramento da Cisterna</h3>
+                    <p class="feature-text">Acompanhe o nível da água e consulte o histórico de medições recebidas.</p>
                 </div>
 
                 <div class="card feature-card">
@@ -1034,7 +1148,7 @@
                 <div class="card feature-card">
                     <div class="feature-icon icon-secondary"><i class="fas fa-microchip"></i></div>
                     <h3 class="feature-title title-secondary">Tecnologia Arduino</h3>
-                    <p class="feature-text">Baseado em ESP32 com sensores de temperatura, umidade e nível de água.</p>
+                    <p class="feature-text">Baseado em ESP32 com sensores de nível de água.</p>
                 </div>
 
                 <div class="card feature-card">
@@ -1063,17 +1177,17 @@
                     <div class="step">
                         <div class="step-circle step-accent">3</div>
                         <h4 class="step-title">Monitoramento</h4>
-                        <p class="step-text">Acompanhe o nível, temperatura e umidade em tempo real</p>
+                        <p class="step-text">Acompanhe o nível da cisterna e o histórico de medições</p>
                     </div>
                     <div class="step">
                         <div class="step-circle step-primary">4</div>
-                        <h4 class="step-title">Controle</h4>
-                        <p class="step-text">Controle bombas e válvulas manualmente ou com automação</p>
+                        <h4 class="step-title">Histórico</h4>
+                        <p class="step-text">Consulte as variações de nível registradas pelo dispositivo</p>
                     </div>
                     <div class="step">
                         <div class="step-circle step-secondary">5</div>
-                        <h4 class="step-title">Irrigação</h4>
-                        <p class="step-text">Reutilize a água em plantas, jardim ou atividades diversas</p>
+                        <h4 class="step-title">Reutilização</h4>
+                        <p class="step-text">Use a água coletada nas plantas, no jardim ou em outras atividades</p>
                     </div>
                     <div class="step">
                         <div class="step-circle step-accent">6</div>
@@ -1168,16 +1282,6 @@
                         <div class="metric-value" id="waterToday">12.5</div>
                         <div class="metric-unit">Litros</div>
                     </div>
-                    <div class="metric-box">
-                        <div class="metric-label">Umidade do Solo</div>
-                        <div class="metric-value" id="soilMoisture">42</div>
-                        <div class="metric-unit">%</div>
-                    </div>
-                    <div class="metric-box">
-                        <div class="metric-label">Temperatura</div>
-                        <div class="metric-value" id="temperature">28</div>
-                        <div class="metric-unit">°C</div>
-                    </div>
                 </div>
 
                 <div class="card">
@@ -1211,53 +1315,10 @@
             <div id="monitoramento" class="tabs-container">
                 <div class="card">
                     <div class="card-title">
-                        <i class="fas fa-thermometer-half"></i> Sensores
-                    </div>
-                    <div class="sensors-grid">
-                        <div class="sensor-box">
-                            <p class="sensor-label">SENSOR DE CHUVA</p>
-                            <p class="sensor-value title-primary">Inativo</p>
-                            <span class="status-badge status-inactive">Sem Chuva</span>
-                        </div>
-                        <div class="sensor-box sensor-secondary">
-                            <p class="sensor-label">SENSOR DE UMIDADE</p>
-                            <p class="sensor-value title-secondary">42%</p>
-                            <span class="status-badge status-active">Monitorando</span>
-                        </div>
-                        <div class="sensor-box sensor-accent">
-                            <p class="sensor-label">TEMPERATURA</p>
-                            <p class="sensor-value title-accent">28°C</p>
-                            <span class="status-badge status-warning">Moderado</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-title">
                         <i class="fas fa-history"></i> Log de Eventos
                     </div>
-                    <div class="event-log">
-                        <div class="log-entry">
-                            <div>
-                                <p class="log-title title-primary">Cisterna cheia</p>
-                                <p class="log-desc">O tanque atingiu 100% de capacidade</p>
-                            </div>
-                            <p class="log-time">Hoje às 14:32</p>
-                        </div>
-                        <div class="log-entry">
-                            <div>
-                                <p class="log-title title-accent">Água liberada</p>
-                                <p class="log-desc">Válvula de extravasora ativada automaticamente</p>
-                            </div>
-                            <p class="log-time">Hoje às 14:15</p>
-                        </div>
-                        <div class="log-entry">
-                            <div>
-                                <p class="log-title title-secondary">Bomba acionada</p>
-                                <p class="log-desc">Sistema de irrigação iniciado por comando manual</p>
-                            </div>
-                            <p class="log-time">Ontem às 09:45</p>
-                        </div>
+                    <div class="event-log" id="eventLog" aria-live="polite">
+                        <p class="log-desc">Carregando histórico...</p>
                     </div>
                 </div>
             </div>
@@ -1265,20 +1326,6 @@
             <!-- ABA 3: CONTROLES -->
             <div id="controles" class="tabs-container">
                 <div class="controls-grid">
-                    <div class="control-card">
-                        <div class="card-title control-title">
-                            <i class="fas fa-pump-soap"></i> Bomba de Irrigação
-                        </div>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="pumpToggle" onchange="toggleControl('pump')">
-                            <span class="slider"></span>
-                        </label>
-                        <p id="pumpStatus" class="control-status">Desativada</p>
-                        <button class="btn btn-primary control-btn" onclick="agendarBomba()">
-                            <i class="fas fa-clock"></i> Agendar
-                        </button>
-                    </div>
-
                     <div class="control-card">
                         <div class="card-title control-title">
                             <i class="fas fa-valve"></i> Válvula Solenoide
@@ -1313,14 +1360,6 @@
                         <i class="fas fa-cogs"></i> Configurações de Automação
                     </div>
                     <form>
-                        <div class="form-group">
-                            <label for="autoIrrigation">
-                                <input type="checkbox" id="autoIrrigation" class="inline-checkbox">
-                                Ativar irrigação automática quando umidade cair abaixo de
-                            </label>
-                            <input type="number" id="autoIrrigationValue" min="0" max="100" value="30" style="width: 100px;">
-                            <span>%</span>
-                        </div>
                         <div class="form-group">
                             <label for="autoDrain">
                                 <input type="checkbox" id="autoDrain" class="inline-checkbox" checked>
@@ -1466,9 +1505,7 @@
                     <select id="deviceType" required>
                         <option value="">Selecione um tipo</option>
                         <option value="sensor">Sensor de Nível</option>
-                        <option value="pump">Bomba</option>
                         <option value="valve">Válvula</option>
-                        <option value="weather">Sensor Climático</option>
                     </select>
                 </div>
                 <div class="form-actions">
@@ -1532,12 +1569,14 @@
         function mostrarPainel() {
             document.getElementById('publicContent').style.display = 'none';
             document.getElementById('dashboardContent').style.display = 'block';
+            document.querySelector('.auth-buttons').style.display = 'none';
         }
 
         function sair() {
             if (confirm('Tem certeza que deseja sair?')) {
                 document.getElementById('publicContent').style.display = 'block';
                 document.getElementById('dashboardContent').style.display = 'none';
+                document.querySelector('.auth-buttons').style.display = '';
                 mostrarSucesso('Desconectado com sucesso!');
             }
         }
@@ -1568,21 +1607,10 @@
             const toggle = document.getElementById(control + 'Toggle');
             const status = document.getElementById(control + 'Status');
 
-            if (control === 'pump') {
-                status.textContent = toggle.checked ? 'Ativada' : 'Desativada';
-                status.style.color = toggle.checked ? 'var(--primary)' : 'var(--text-secondary)';
-                console.log('Bomba:', toggle.checked ? 'ligada' : 'desligada');
-            } else if (control === 'solenoid') {
+            if (control === 'solenoid') {
                 status.textContent = toggle.checked ? 'Aberta' : 'Fechada';
                 status.style.color = toggle.checked ? 'var(--primary)' : 'var(--text-secondary)';
                 console.log('Válvula Solenoide:', toggle.checked ? 'aberta' : 'fechada');
-            }
-        }
-
-        function agendarBomba() {
-            const minutes = prompt('Quantos minutos deseja agendar a bomba? (máximo 120)', '30');
-            if (minutes && minutes > 0 && minutes <= 120) {
-                mostrarSucesso(`Bomba agendada para ${minutes} minutos`);
             }
         }
 
@@ -1669,8 +1697,6 @@
         // Nível do tanque vem da API (ESP32); os demais continuam fixos
         async function atualizarDadosPainel() {
             document.getElementById('waterToday').textContent = 10;
-            document.getElementById('soilMoisture').textContent = 10;
-            document.getElementById('temperature').textContent = 10;
 
             try {
                 const resp = await fetch(API_URL + '/api/medicoes/ultima', { cache: 'no-store' });
@@ -1690,9 +1716,66 @@
             }
         }
 
+        async function atualizarLogEventos() {
+            const log = document.getElementById('eventLog');
+
+            try {
+                const resp = await fetch(API_URL + '/api/medicoes/historico?limite=100', { cache: 'no-store' });
+                if (!resp.ok) throw new Error('Falha ao consultar histórico');
+
+                const medicoes = await resp.json();
+                if (medicoes.length === 0) {
+                    log.textContent = 'Nenhuma medição registrada ainda.';
+                    return;
+                }
+
+                const eventos = medicoes.filter((medicao, indice) =>
+                    indice === 0 || medicao.nivel_percentual !== medicoes[indice - 1].nivel_percentual
+                );
+                log.replaceChildren();
+
+                eventos.forEach((medicao, indice) => {
+                    const anterior = eventos[indice + 1];
+                    let titulo = `Nível registrado: ${medicao.nivel_percentual}%`;
+                    let classeTitulo = 'title-secondary';
+
+                    if (anterior && medicao.nivel_percentual > anterior.nivel_percentual) {
+                        titulo = `Nível aumentou para ${medicao.nivel_percentual}%`;
+                        classeTitulo = 'title-primary';
+                    } else if (anterior && medicao.nivel_percentual < anterior.nivel_percentual) {
+                        titulo = `Nível reduziu para ${medicao.nivel_percentual}%`;
+                        classeTitulo = 'title-accent';
+                    }
+
+                    const entrada = document.createElement('div');
+                    entrada.className = 'log-entry';
+                    const detalhes = document.createElement('div');
+                    const tituloElemento = document.createElement('p');
+                    tituloElemento.className = `log-title ${classeTitulo}`;
+                    tituloElemento.textContent = titulo;
+                    const descricao = document.createElement('p');
+                    descricao.className = 'log-desc';
+                    descricao.textContent = `Dispositivo: ${medicao.dispositivo_nome || medicao.dispositivo_id}`;
+                    const horario = document.createElement('p');
+                    horario.className = 'log-time';
+                    horario.textContent = new Date(medicao.criado_em).toLocaleString('pt-BR');
+
+                    detalhes.append(tituloElemento, descricao);
+                    entrada.append(detalhes, horario);
+                    log.append(entrada);
+                });
+            } catch (erro) {
+                if (log.children.length === 0 || log.querySelector('.log-desc')?.textContent === 'Carregando histórico...') {
+                    log.textContent = 'Não foi possível carregar o histórico de medições.';
+                }
+            }
+        }
+
         // Consulta a API a cada 2 segundos; o tanque muda assim que o ESP enviar um novo nível
         atualizarDadosPainel();
         setInterval(atualizarDadosPainel, 2000);
+        atualizarLogEventos();
+        setInterval(atualizarLogEventos, 10000);
 
         // AJUSTE DE ALTURA DO CONTEÚDO PRINCIPAL
         function ajustarAlturaMain() {
