@@ -1415,10 +1415,15 @@
                 cabecalhos.set('Authorization', `Bearer ${token}`);
             }
 
-            const resposta = await fetch(API_URL + caminho, {
-                ...opcoes,
-                headers: cabecalhos
-            });
+            let resposta;
+            try {
+                resposta = await fetch(API_URL + caminho, {
+                    ...opcoes,
+                    headers: cabecalhos
+                });
+            } catch {
+                throw new Error(`Não foi possível conectar à API em ${API_URL}. Verifique se ela está em execução e se o IP está correto.`);
+            }
             const texto = await resposta.text();
             const dados = texto ? JSON.parse(texto) : null;
             if (!resposta.ok) {
