@@ -651,87 +651,6 @@
             font-size: 12px;
         }
 
-        /* CONTROLES */
-        .controls-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-        }
-
-        .control-card {
-            background: var(--bg-light);
-            border: 2px solid var(--primary);
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-
-        .control-card.inactive {
-            border-color: var(--text-secondary);
-            opacity: 0.7;
-        }
-
-        .control-title {
-            justify-content: center;
-            margin-bottom: 15px;
-        }
-
-        .control-status {
-            color: var(--text-secondary);
-            margin-top: 10px;
-        }
-
-        .control-btn {
-            width: 100%;
-            margin-top: 15px;
-        }
-
-        .toggle-switch {
-            width: 60px;
-            height: 34px;
-            position: relative;
-            margin: 20px auto;
-        }
-
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: var(--text-secondary);
-            transition: 0.4s;
-            border-radius: 34px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 26px;
-            width: 26px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: 0.4s;
-            border-radius: 50%;
-        }
-
-        input:checked + .slider {
-            background-color: var(--primary);
-        }
-
-        input:checked + .slider:before {
-            transform: translateX(26px);
-        }
-
         /* DISPOSITIVOS */
         .devices-grid {
             display: grid;
@@ -1254,9 +1173,6 @@
                 <button class="tab-btn" onclick="switchTab('monitoramento')">
                     <i class="fas fa-chart-line"></i> Monitoramento
                 </button>
-                <button class="tab-btn" onclick="switchTab('controles')">
-                    <i class="fas fa-sliders-h"></i> Controles
-                </button>
                 <button class="tab-btn" onclick="switchTab('dispositivos')">
                     <i class="fas fa-microchip"></i> Dispositivos
                 </button>
@@ -1323,59 +1239,7 @@
                 </div>
             </div>
 
-            <!-- ABA 3: CONTROLES -->
-            <div id="controles" class="tabs-container">
-                <div class="controls-grid">
-                    <div class="control-card">
-                        <div class="card-title control-title">
-                            <i class="fas fa-valve"></i> Válvula Solenoide
-                        </div>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="solenoidToggle" onchange="toggleControl('solenoid')">
-                            <span class="slider"></span>
-                        </label>
-                        <p id="solenoidStatus" class="control-status">Fechada</p>
-                        <button class="btn btn-danger control-btn btn-disabled-look">
-                            <i class="fas fa-ban"></i> Apenas Leitura
-                        </button>
-                    </div>
-
-                    <div class="control-card">
-                        <div class="card-title control-title">
-                            <i class="fas fa-droplet-slash"></i> Válvula de Extravasora
-                        </div>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="drainToggle" disabled>
-                            <span class="slider"></span>
-                        </label>
-                        <p id="drainStatus" class="control-status">Automática</p>
-                        <p style="font-size: 12px; color: var(--warning); margin-top: 15px;">
-                            <i class="fas fa-info-circle"></i> Controlada automaticamente
-                        </p>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-title">
-                        <i class="fas fa-cogs"></i> Configurações de Automação
-                    </div>
-                    <form>
-                        <div class="form-group">
-                            <label for="autoDrain">
-                                <input type="checkbox" id="autoDrain" class="inline-checkbox" checked>
-                                Ativar extravasora quando cisterna atingir
-                            </label>
-                            <input type="number" id="autoDrainValue" min="0" max="100" value="95" style="width: 100px;">
-                            <span>%</span>
-                        </div>
-                        <button type="button" class="btn btn-primary" style="margin-top: 15px;">
-                            <i class="fas fa-save"></i> Salvar Configurações
-                        </button>
-                    </form>
-                </div>
-            </div>
-
-            <!-- ABA 4: DISPOSITIVOS -->
+            <!-- ABA 3: DISPOSITIVOS -->
             <div id="dispositivos" class="tabs-container">
                 <button class="btn btn-primary" style="margin-bottom: 20px;" onclick="openModal('addDeviceModal')">
                     <i class="fas fa-plus"></i> Adicionar Dispositivo
@@ -1413,7 +1277,7 @@
                 </div>
             </div>
 
-            <!-- ABA 5: PERFIL -->
+            <!-- ABA 4: PERFIL -->
             <div id="perfil" class="tabs-container">
                 <div class="card">
                     <div class="card-title">
@@ -1505,7 +1369,6 @@
                     <select id="deviceType" required>
                         <option value="">Selecione um tipo</option>
                         <option value="sensor">Sensor de Nível</option>
-                        <option value="valve">Válvula</option>
                     </select>
                 </div>
                 <div class="form-actions">
@@ -1600,18 +1463,6 @@
 
             // Adicionar classe ativa ao botão clicado
             event.target.classList.add('active');
-        }
-
-        // FUNÇÕES DE CONTROLE
-        function toggleControl(control) {
-            const toggle = document.getElementById(control + 'Toggle');
-            const status = document.getElementById(control + 'Status');
-
-            if (control === 'solenoid') {
-                status.textContent = toggle.checked ? 'Aberta' : 'Fechada';
-                status.style.color = toggle.checked ? 'var(--primary)' : 'var(--text-secondary)';
-                console.log('Válvula Solenoide:', toggle.checked ? 'aberta' : 'fechada');
-            }
         }
 
         // FUNÇÕES DE PERFIL
