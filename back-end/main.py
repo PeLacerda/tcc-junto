@@ -1,11 +1,6 @@
 #* para rodar o projeto: python -m uvicorn main:app --host 0.0.0.0 --port 8000  (o --host 0.0.0.0 é necessário para o ESP32 acessar) *#
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from passlib.context import CryptContext
-from dotenv import load_dotenv
-import os
-
-load_dotenv()
 
 app = FastAPI()
 
@@ -16,11 +11,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-SECRET_KEY = os.getenv("SECRET_KEY")
-
-
-bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # importar os roteadores de requisições
 from auth_routes import auth_router

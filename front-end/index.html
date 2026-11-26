@@ -769,6 +769,16 @@
             display: none;
         }
 
+        .success-message,
+        .error-message {
+            position: fixed;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(600px, calc(100% - 32px));
+            z-index: 3000;
+        }
+
         /* RESPONSIVO */
         @media (max-width: 768px) {
             header {
@@ -970,7 +980,7 @@
                 </div>
                 <div class="form-group">
                     <label>
-                        <input type="checkbox" class="inline-checkbox">
+                        <input type="checkbox" id="rememberLogin" class="inline-checkbox">
                         Manter-me conectado
                     </label>
                 </div>
@@ -1011,12 +1021,6 @@
                     <label for="registerConfirmPassword">Confirmar Senha</label>
                     <input type="password" id="registerConfirmPassword" required>
                 </div>
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" class="inline-checkbox" required>
-                        Aceito os termos e condições
-                    </label>
-                </div>
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeModal('registerModal')">Cancelar</button>
                     <button type="submit" class="btn btn-primary">Cadastrar</button>
@@ -1027,6 +1031,9 @@
 
     <!-- MAIN CONTENT -->
     <main class="container">
+        <div id="successMessage" class="success-message" role="status" aria-live="polite"></div>
+        <div id="errorMessage" class="error-message" role="alert"></div>
+
         <!-- CONTEÚDO ANTES DO LOGIN -->
         <div id="publicContent">
             <!-- HERO SECTION -->
@@ -1161,14 +1168,6 @@
 
         <!-- CONTEÚDO APÓS LOGIN -->
         <div id="dashboardContent" style="display: none;">
-            <!-- MENSAGENS -->
-            <div id="successMessage" class="success-message">
-                <i class="fas fa-check-circle"></i> Operação realizada com sucesso!
-            </div>
-            <div id="errorMessage" class="error-message">
-                <i class="fas fa-exclamation-circle"></i> Ocorreu um erro. Tente novamente.
-            </div>
-
             <!-- ABAS PRINCIPAIS -->
             <div class="tabs-nav">
                 <button class="tab-btn active" onclick="switchTab('dashboard')">
@@ -1290,15 +1289,15 @@
                     <form>
                         <div class="form-group">
                             <label for="profileName">Nome Completo</label>
-                            <input type="text" id="profileName" value="Maria Silva">
+                            <input type="text" id="profileName" required>
                         </div>
                         <div class="form-group">
                             <label for="profileEmail">Email</label>
-                            <input type="email" id="profileEmail" value="maria@example.com">
+                            <input type="email" id="profileEmail" required>
                         </div>
                         <div class="form-group">
                             <label for="profilePhone">Telefone</label>
-                            <input type="tel" id="profilePhone" value="(11) 98765-4321">
+                            <input type="tel" id="profilePhone">
                         </div>
                         <div class="form-group">
                             <label for="profileAddress">Endereço</label>
@@ -1321,7 +1320,7 @@
                         </div>
                         <div class="form-group">
                             <label for="newPassword">Nova Senha</label>
-                            <input type="password" id="newPassword">
+                            <input type="password" id="newPassword" minlength="8">
                         </div>
                         <div class="form-group">
                             <label for="confirmNewPassword">Confirmar Nova Senha</label>
@@ -1384,6 +1383,59 @@
     </div>
 
     <script>
+        const API_HOST = window.location.hostname || '127.0.0.1';
+        const API_URL = `http://${API_HOST}:8000`;
+        const TOKEN_STORAGE_KEY = 'airh2o_access_token';
+
+        function obterToken() {
+            return sessionStorage.getItem(TOKEN_STORAGE_KEY) || localStorage.getItem(TOKEN_STORAGE_KEY);
+        }
+
+        function salvarToken(token) {
+            sessionStorage.removeItem(TOKEN_STORAGE_KEY);
+            localStorage.removeItem(TOKEN_STORAGE_KEY);
+            const armazenamento = document.getElementById('rememberLogin').checked
+                ? localStorage
+                : sessionStorage;
+            armazenamento.setItem(TOKEN_STORAGE_KEY, token);
+        }
+
+        function limparToken() {
+            sessionStorage.removeItem(TOKEN_STORAGE_KEY);
+            localStorage.removeItem(TOKEN_STORAGE_KEY);
+        }
+
+        async function requisicaoAPI(caminho, opcoes = {}, autenticada = false) {
+            const cabecalhos = new Headers(opcoes.headers || {});
+            if (autenticada) {
+                const token = obterToken();
+                if (!token) {
+                    throw new Error('Faça login para continuar.');
+                }
+                cabecalhos.set('Authorization', `Bearer ${token}`);
+            }
+
+            const resposta = await fetch(API_URL + caminho, {
+                ...opcoes,
+                headers: cabecalhos
+            });
+            const texto = await resposta.text();
+            const dados = texto ? JSON.parse(texto) : null;
+            if (!resposta.ok) {
+                const erro = new Error(dados?.detail || 'Não foi possível concluir a operação.');
+                erro.status = resposta.status;
+                throw erro;
+            }
+            return dados;
+        }
+
+        function preencherPerfil(usuario) {
+            document.getElementById('profileName').value = usuario.nome || '';
+            document.getElementById('profileEmail').value = usuario.email || '';
+            document.getElementById('profilePhone').value = usuario.telefone || '';
+            document.getElementById('profileAddress').value = usuario.endereco || '';
+        }
+
         // FUNÇÕES DE MODAL
         function openModal(modalId) {
             document.getElementById(modalId).style.display = 'block';
@@ -1401,36 +1453,70 @@
         }
 
         // FUNÇÕES DE AUTENTICAÇÃO
-        function handleLogin(event) {
+        async function handleLogin(event) {
             event.preventDefault();
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-
-            // Aqui você faria a autenticação real com o backend
-            console.log('Entrar:', email, password);
-
-            mostrarSucesso('Entrada realizada com sucesso!');
-            closeModal('loginModal');
-            mostrarPainel();
+            try {
+                const resposta = await requisicaoAPI('/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: document.getElementById('loginEmail').value,
+                        senha: document.getElementById('loginPassword').value
+                    })
+                });
+                salvarToken(resposta.access_token);
+                preencherPerfil(resposta.usuario);
+                document.getElementById('loginPassword').value = '';
+                closeModal('loginModal');
+                mostrarPainel();
+                mostrarSucesso('Login realizado com sucesso!');
+            } catch (erro) {
+                mostrarErro(erro.message);
+            }
         }
 
-        function handleRegister(event) {
+         async function handleRegister(event) {
             event.preventDefault();
-            const name = document.getElementById('registerName').value;
-            const email = document.getElementById('registerEmail').value;
-            const password = document.getElementById('registerPassword').value;
-            const confirmPassword = document.getElementById('registerConfirmPassword').value;
+            const senha = document.getElementById('registerPassword').value;
+            const confirmarSenha = document.getElementById('registerConfirmPassword').value;
 
-            if (password !== confirmPassword) {
+            if (senha !== confirmarSenha) {
                 mostrarErro('As senhas não correspondem!');
                 return;
             }
 
-            // Aqui você faria o registro real com o backend
-            console.log('Cadastro:', name, email, password);
+            if (senha.length < 8 || !/[a-zA-Z]/.test(senha) || !/\d/.test(senha)) {
+                mostrarErro('A senha deve ter pelo menos 8 caracteres, com letras e números.');
+                return;
+            }
 
-            mostrarSucesso('Conta criada com sucesso! Por favor, faça entrada.');
-            closeModal('registerModal');
+            const telefoneTexto = document.getElementById('registerPhone').value.replace(/\D/g, '');
+            if (telefoneTexto.length > 15) {
+                mostrarErro('O telefone deve ter no máximo 15 números.');
+                return;
+            }
+
+            try {
+                await requisicaoAPI('/auth/criar_usuario', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        nome: document.getElementById('registerName').value.trim(),
+                        email: document.getElementById('registerEmail').value.trim(),
+                        senha,
+                        telefone: telefoneTexto ? Number(telefoneTexto) : null
+                    })
+                });
+                document.getElementById('loginEmail').value =
+                    document.getElementById('registerEmail').value.trim();
+                document.getElementById('registerPassword').value = '';
+                document.getElementById('registerConfirmPassword').value = '';
+                closeModal('registerModal');
+                openModal('loginModal');
+                mostrarSucesso('Conta criada. Entre com seu email e senha.');
+            } catch (erro) {
+                mostrarErro(erro.message);
+            }
         }
 
         function mostrarPainel() {
@@ -1442,6 +1528,7 @@
 
         function sair() {
             if (confirm('Tem certeza que deseja sair?')) {
+                limparToken();
                 document.getElementById('publicContent').style.display = 'block';
                 document.getElementById('dashboardContent').style.display = 'none';
                 document.querySelector('.auth-buttons').style.display = '';
@@ -1472,45 +1559,97 @@
         }
 
         // FUNÇÕES DE PERFIL
-        function salvarPerfil() {
-            const name = document.getElementById('profileName').value;
-            const email = document.getElementById('profileEmail').value;
-            const phone = document.getElementById('profilePhone').value;
-            const address = document.getElementById('profileAddress').value;
+        async function salvarPerfil() {
+            const telefoneTexto = document.getElementById('profilePhone').value.replace(/\D/g, '');
+            if (telefoneTexto.length > 15) {
+                mostrarErro('O telefone deve ter no máximo 15 números.');
+                return;
+            }
 
-            console.log('Perfil atualizado:', {name, email, phone, address});
-            mostrarSucesso('Perfil atualizado com sucesso!');
+            try {
+                const usuario = await requisicaoAPI('/auth/me', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        nome: document.getElementById('profileName').value.trim(),
+                        email: document.getElementById('profileEmail').value.trim(),
+                        telefone: telefoneTexto ? Number(telefoneTexto) : null,
+                        endereco: document.getElementById('profileAddress').value.trim() || null
+                    })
+                }, true);
+                preencherPerfil(usuario);
+                mostrarSucesso('Dados da conta atualizados.');
+            } catch (erro) {
+                mostrarErro(erro.message);
+            }
         }
 
-        function alterarSenha() {
-            const current = document.getElementById('currentPassword').value;
-            const newPass = document.getElementById('newPassword').value;
-            const confirm = document.getElementById('confirmNewPassword').value;
+        async function alterarSenha() {
+            const senhaAtual = document.getElementById('currentPassword').value;
+            const novaSenha = document.getElementById('newPassword').value;
+            const confirmarSenha = document.getElementById('confirmNewPassword').value;
 
-            if (!current || !newPass || !confirm) {
+            if (!senhaAtual || !novaSenha || !confirmarSenha) {
                 mostrarErro('Preencha todos os campos de senha!');
                 return;
             }
 
-            if (newPass !== confirm) {
+            if (novaSenha !== confirmarSenha) {
                 mostrarErro('As senhas não correspondem!');
                 return;
             }
 
-            console.log('Senha alterada');
-            mostrarSucesso('Senha alterada com sucesso!');
-            document.getElementById('currentPassword').value = '';
-            document.getElementById('newPassword').value = '';
-            document.getElementById('confirmNewPassword').value = '';
+            if (novaSenha.length < 8 || !/[a-zA-Z]/.test(novaSenha) || !/\d/.test(novaSenha)) {
+                mostrarErro('A senha deve ter pelo menos 8 caracteres, com letras e números.');
+                return;
+            }
+
+            try {
+                await requisicaoAPI('/auth/alterar_senha', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ senha_atual: senhaAtual, nova_senha: novaSenha })
+                }, true);
+                document.getElementById('currentPassword').value = '';
+                document.getElementById('newPassword').value = '';
+                document.getElementById('confirmNewPassword').value = '';
+                mostrarSucesso('Senha alterada com sucesso.');
+            } catch (erro) {
+                mostrarErro(erro.message);
+            }
         }
 
-        function deletarConta() {
+        async function deletarConta() {
             if (confirm('ATENÇÃO: Isso deletará sua conta permanentemente. Deseja continuar?')) {
                 if (confirm('Esta é a última confirmação. Sua conta será deletada.')) {
-                    mostrarSucesso('Conta deletada. Você será redirecionado em 3 segundos...');
-                    setTimeout(() => {
-                        sair();
-                    }, 3000);
+                    try {
+                        await requisicaoAPI('/auth/me', { method: 'DELETE' }, true);
+                        limparToken();
+                        document.getElementById('publicContent').style.display = 'block';
+                        document.getElementById('dashboardContent').style.display = 'none';
+                        document.querySelector('.auth-buttons').style.display = '';
+                        document.querySelector('.header-content').classList.remove('is-logged-in');
+                        mostrarSucesso('Conta excluída com sucesso.');
+                    } catch (erro) {
+                        mostrarErro(erro.message);
+                    }
+                }
+            }
+        }
+
+        async function restaurarSessao() {
+            if (!obterToken()) {
+                return;
+            }
+            try {
+                const usuario = await requisicaoAPI('/auth/me', {}, true);
+                preencherPerfil(usuario);
+                mostrarPainel();
+            } catch (erro) {
+                if (erro.status === 401) {
+                    limparToken();
+                } else {
+                    mostrarErro('Não foi possível validar sua sessão. Verifique a conexão com a API.');
                 }
             }
         }
@@ -1548,8 +1687,7 @@
             }, 4000);
         }
 
-        // IP do PC que roda a API (o mesmo IP usado em API_BASE_URL no config.h do ESP)
-        const API_URL = 'http://192.168.15.13:8000';
+        restaurarSessao();
 
         // Nível do tanque vem da API (ESP32); os demais continuam fixos
         async function atualizarDadosPainel() {
