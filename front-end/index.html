@@ -60,6 +60,10 @@
             align-items: center;
         }
 
+        .header-content.is-logged-in {
+            justify-content: center;
+        }
+
         .logo {
             font-size: 28px;
             font-weight: bold;
@@ -1433,6 +1437,7 @@
             document.getElementById('publicContent').style.display = 'none';
             document.getElementById('dashboardContent').style.display = 'block';
             document.querySelector('.auth-buttons').style.display = 'none';
+            document.querySelector('.header-content').classList.add('is-logged-in');
         }
 
         function sair() {
@@ -1440,6 +1445,7 @@
                 document.getElementById('publicContent').style.display = 'block';
                 document.getElementById('dashboardContent').style.display = 'none';
                 document.querySelector('.auth-buttons').style.display = '';
+                document.querySelector('.header-content').classList.remove('is-logged-in');
                 mostrarSucesso('Desconectado com sucesso!');
             }
         }
